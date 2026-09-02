@@ -22,6 +22,7 @@ pipeline {
             steps {
                 sh '''
                     docker build -t python-devops-demo:build-${BUILD_NUMBER} .
+                    docker tag python-devops-demo:build-${BUILD_NUMBER} python-devops-demo:current
                 '''
             }
         }
