@@ -34,6 +34,7 @@ pipeline {
 
                     docker run -d \
                         --name python-devops-demo \
+                        --network devops-network \
                         -p 5000:5000 \
                         python-devops-demo:${BUILD_NUMBER}
                 '''
