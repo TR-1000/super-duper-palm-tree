@@ -21,7 +21,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    docker build -t python-devops-demo:${BUILD_NUMBER} .
+                    docker build -t python-devops-demo:build-${BUILD_NUMBER} .
                 '''
             }
         }
@@ -39,7 +39,7 @@ pipeline {
                         --name python-devops-demo \
                         --network devops-network \
                         -p 5000:5000 \
-                        python-devops-demo:${BUILD_NUMBER}
+                        python-devops-demo:build-${BUILD_NUMBER}
                 '''
             }
         }
