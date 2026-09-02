@@ -36,6 +36,8 @@ pipeline {
                     echo "Removing existing container..."
                     docker rm python-devops-demo || true
 
+                    echo "Deploying image: python-devops-demo:build-${BUILD_NUMBER}"
+
                     docker run -d \
                         --name python-devops-demo \
                         --network devops-network \
