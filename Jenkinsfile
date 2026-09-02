@@ -30,6 +30,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
+                    PREVIOUS_IMAGE=$(docker inspect -f '{{.Config.Image}}' python-devops-demo 2>/dev/null || true)
+                    echo "Previously deployed image: ${PREVIOUS_IMAGE:-none}"
+                    
                     echo "Stopping existing container..."
                     docker stop python-devops-demo || true
 
