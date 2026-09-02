@@ -43,14 +43,26 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sh '''
-                    echo "Waiting for application to start..."
-                    sleep 3
+                script {
+                    // Retries the block up to 10 times before failing
+                    retry(10) {
+                        echo "Waiting for application to start..."
 
-                    curl --fail http://python-devops-demo:5000/health
+                        // Check if curl fails
+                        def statusCode = sh(
+                            script: 'curl --fail http://python-devops-demo:5000/health', 
+                            returnStatus: true
+                        )
 
-                    echo "Application health check passed!"
-                '''
+                        if (statusCode != 0) {
+                            echo "Health check failed. Retrying in 5 seconds..."
+                            sleep 5
+                            error "Application not ready yet." // Forces the retry block to loop
+                        }
+
+                        echo "Application health check passed!"
+                    }
+                }
             }
         }
     }
