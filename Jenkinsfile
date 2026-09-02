@@ -43,6 +43,14 @@ pipeline {
                         --network devops-network \
                         -p 5000:5000 \
                         python-devops-demo:build-${BUILD_NUMBER}
+
+                    sleep 2
+
+                    if [ "$(docker inspect -f '{{.State.Running}}' python-devops-demo)" != "true" ]; then
+                        echo "ERROR: Application container failed to stay running."
+                        docker logs python-devops-demo
+                        exit 1
+                    fi
                 '''
             }
         }
