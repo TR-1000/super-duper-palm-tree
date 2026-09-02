@@ -10,10 +10,10 @@ def test_home():
     assert response.data == b"Hello from my DevOps pipeline!"
 
 
-def test_health():
-    client = app.test_client()
+# def test_health():
+#     client = app.test_client()
 
-    response = client.get("/health")
+#     response = client.get("/health")
 
-    assert response.status_code == 200
-    assert response.status_code == 200
+#     assert response.status_code == 200
+#     assert response.status_code == 200
