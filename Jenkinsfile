@@ -47,7 +47,7 @@ pipeline {
                     echo "Waiting for application to start..."
                     sleep 3
 
-                    curl --fail http://localhost:5000/health
+                    curl --fail http://python-devops-demo:5000/health
 
                     echo "Application health check passed!"
                 '''
