@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -37,6 +36,19 @@ pipeline {
                         --name python-devops-demo \
                         -p 5000:5000 \
                         python-devops-demo:${BUILD_NUMBER}
+                '''
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                sh '''
+                    echo "Waiting for application to start..."
+                    sleep 3
+
+                    curl --fail http://localhost:5000/health
+
+                    echo "Application health check passed!"
                 '''
             }
         }
