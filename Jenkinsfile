@@ -29,7 +29,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
+                    echo "Stopping existing container..."
                     docker stop python-devops-demo || true
+
+                    echo "Removing existing container..."
                     docker rm python-devops-demo || true
 
                     docker run -d \
