@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DEPLOYMENT_ATTEMPTED = 'false'
-        PREVIOUS_IMAGE = ''
     }
 
     stages {
@@ -36,13 +35,20 @@ pipeline {
             steps {
                 script {
                     env.PREVIOUS_IMAGE = sh(
-                        script: "docker inspect -f '{{.Config.Image}}' python-devops-demo 2>/dev/null || true",
+                        script: """
+                            docker inspect -f '{{.Config.Image}}' python-devops-demo 2>/dev/null || true
+                        """,
                         returnStdout: true
                     ).trim()
 
-                    echo "Previously deployed image: ${env.PREVIOUS_IMAGE ?: 'none'}"
+                    echo "DEBUG: Previous image = '${env.PREVIOUS_IMAGE}'"
 
-                    // Tell the pipeline that a deployment is being attempted
+                    if (env.PREVIOUS_IMAGE) {
+                        echo "Previously deployed image: ${env.PREVIOUS_IMAGE}"
+                    } else {
+                        echo "No previous deployment found."
+                    }
+
                     env.DEPLOYMENT_ATTEMPTED = 'true'
                 }       
 
@@ -72,7 +78,7 @@ pipeline {
                         exit 1
                     fi
 
-                    echo "Application container is running."
+                    echo "Application container is running."echo "Application container is running."
                 '''
             }
         }
