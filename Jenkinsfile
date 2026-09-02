@@ -48,6 +48,7 @@ pipeline {
 
                     if [ "$(docker inspect -f '{{.State.Running}}' python-devops-demo)" != "true" ]; then
                         echo "ERROR: Application container failed to stay running."
+                        echo "Container logs:"
                         docker logs python-devops-demo
                         exit 1
                     fi
