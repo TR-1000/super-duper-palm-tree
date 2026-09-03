@@ -101,9 +101,13 @@ pipeline {
 
                         echo "Application health check passed!"
 
-                        docker tag python-devops-demo:build-${BUILD_NUMBER} python-devops-demo:current
+                        
+                        // Tag tag deployed image as current and clean up deployment marker file
+                        sh '''
+                            docker tag python-devops-demo:build-${BUILD_NUMBER} python-devops-demo:current
 
-                        sh 'rm -f .deployment-attempted'
+                            rm -f .deployment-attempted
+                        '''
                     }
                 }
             }
