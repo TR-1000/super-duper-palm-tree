@@ -10,4 +10,4 @@ COPY app.py .
 
 EXPOSE 5000
 
-CMD ["python", "does-not-exist.py"]
+CMD ["python", "app.py"]
