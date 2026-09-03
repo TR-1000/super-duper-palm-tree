@@ -22,7 +22,6 @@ pipeline {
             steps {
                 sh '''
                     docker build -t python-devops-demo:build-${BUILD_NUMBER} .
-                    docker tag python-devops-demo:build-${BUILD_NUMBER} python-devops-demo:current
                 '''
             }
         }
@@ -45,7 +44,9 @@ pipeline {
                         echo "No previous deployment found."
                     }
 
-                    env.DEPLOYMENT_ATTEMPTED = 'true'
+                    // Record deployment attempt.
+                    sh 'touch .deployment-attempted'
+                    echo "DEBUG: Deployment marker created."
                 }       
 
                 sh '''
@@ -74,7 +75,7 @@ pipeline {
                         exit 1
                     fi
 
-                    echo "Application container is running."echo "Application container is running."
+                    echo "Application container is running."
                 '''
             }
         }
@@ -99,6 +100,10 @@ pipeline {
                         }
 
                         echo "Application health check passed!"
+
+                        docker tag python-devops-demo:build-${BUILD_NUMBER} python-devops-demo:current
+
+                        sh 'rm -f .deployment-attempted'
                     }
                 }
             }
@@ -106,69 +111,78 @@ pipeline {
     }
 
     post {
-        failure {
-            script {
+    failure {
+        script {
 
-                if (env.DEPLOYMENT_ATTEMPTED == 'true' && env.PREVIOUS_IMAGE) {
+            if (fileExists('.deployment-attempted') && env.PREVIOUS_IMAGE) {
+
+                echo "=========================================="
+                echo "DEPLOYMENT FAILED"
+                echo "=========================================="
+
+                echo "Previous image: ${env.PREVIOUS_IMAGE}"
+                echo "Rolling back..."
+
+                sh """
+                    echo "Stopping failed deployment..."
+
+                    docker stop python-devops-demo || true
+
+                    echo "Removing failed deployment..."
+
+                    docker rm python-devops-demo || true
+
+                    echo "Starting previous image: ${env.PREVIOUS_IMAGE}"
+
+                    docker run -d \
+                        --name python-devops-demo \
+                        --network devops-network \
+                        -p 5000:5000 \
+                        ${env.PREVIOUS_IMAGE}
+
+                    echo "Waiting for rollback container..."
+
+                    sleep 2
+
+                    if [ "\$(docker inspect -f '{{.State.Running}}' python-devops-demo)" != "true" ]; then
+                        echo "ERROR: Rollback container failed to stay running."
+
+                        echo "Rollback container logs:"
+                        docker logs python-devops-demo
+
+                        exit 1
+                    fi
+
+                    echo "Rollback container is running."
+
+                    echo "Checking rollback health..."
+
+                    curl --fail http://python-devops-demo:5000/health
+
+                    echo "Rollback health check passed!"
 
                     echo "=========================================="
-                    echo "DEPLOYMENT FAILED"
+                    echo "ROLLBACK SUCCESSFUL"
                     echo "=========================================="
 
-                    echo "Rolling back to: ${env.PREVIOUS_IMAGE}"
+                    docker tag ${PREVIOUS_IMAGE} python-devops-demo:current
+                """
 
-                    sh """
-                        echo "Stopping failed deployment..."
+            } else {
 
-                        docker stop python-devops-demo || true
+                echo "No rollback performed."
 
-                        echo "Removing failed deployment..."
+                if (!fileExists('.deployment-attempted')) {
+                    echo "Deployment was not attempted."
+                }
 
-                        docker rm python-devops-demo || true
-
-                        echo "Starting previous image: ${env.PREVIOUS_IMAGE}"
-
-                        docker run -d \
-                            --name python-devops-demo \
-                            --network devops-network \
-                            -p 5000:5000 \
-                            ${env.PREVIOUS_IMAGE}
-
-                        echo "Waiting for rollback container..."
-
-                        sleep 2
-
-                        if [ "\$(docker inspect -f '{{.State.Running}}' python-devops-demo)" != "true" ]; then
-                            echo "ERROR: Rollback container failed to stay running."
-
-                            echo "Rollback container logs:"
-                            docker logs python-devops-demo
-
-                            exit 1
-                        fi
-
-                        echo "Rollback container is running."
-
-                        echo "Checking rollback health..."
-
-                        curl --fail http://python-devops-demo:5000/health
-
-                        echo "Rollback health check passed!"
-
-                        echo "=========================================="
-                        echo "ROLLBACK SUCCESSFUL"
-                        echo "=========================================="
-                    """
-
-                } else {
-
-                    echo "No rollback performed."
-                    echo "Deployment was not attempted or no previous image was available."
-
+                if (!env.PREVIOUS_IMAGE) {
+                    echo "No previous image was available."
                 }
             }
         }
     }
+}
 
 
 }
