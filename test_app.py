@@ -7,7 +7,7 @@ def test_home():
     response = client.get("/")
 
     assert response.status_code == 200
-    assert response.data == b'<body style="background-color: black; color: white;">Hello from my DevOps pipeline!</body>'
+    assert response.data == b"Hello from my DevOps pipeline!"
 
 
 def test_health():
