@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DEPLOYMENT_ATTEMPTED = 'false'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -49,7 +45,9 @@ pipeline {
                         echo "No previous deployment found."
                     }
 
-                    env.DEPLOYMENT_ATTEMPTED = 'true'
+                    // Record deployment attempt.
+                    sh 'touch .deployment-attempted'
+                    echo "DEBUG: Deployment marker created."
                 }       
 
                 sh '''
@@ -78,7 +76,7 @@ pipeline {
                         exit 1
                     fi
 
-                    echo "Application container is running."echo "Application container is running."
+                    echo "Application container is running."
                 '''
             }
         }
