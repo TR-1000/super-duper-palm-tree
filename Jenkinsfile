@@ -22,7 +22,6 @@ pipeline {
             steps {
                 sh '''
                     docker build -t python-devops-demo:build-${BUILD_NUMBER} .
-                    docker tag python-devops-demo:build-${BUILD_NUMBER} python-devops-demo:current
                 '''
             }
         }
@@ -102,6 +101,8 @@ pipeline {
 
                         echo "Application health check passed!"
 
+                        docker tag python-devops-demo:build-${BUILD_NUMBER} python-devops-demo:current
+
                         sh 'rm -f .deployment-attempted'
                     }
                 }
@@ -163,6 +164,8 @@ pipeline {
                     echo "=========================================="
                     echo "ROLLBACK SUCCESSFUL"
                     echo "=========================================="
+
+                    docker tag ${PREVIOUS_IMAGE} python-devops-demo:current
                 """
 
             } else {
