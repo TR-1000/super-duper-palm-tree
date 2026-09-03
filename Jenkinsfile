@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DEPLOYMENT_ATTEMPTED = 'false'
-    }
-
     stages {
         stage('Checkout') {
             steps {
