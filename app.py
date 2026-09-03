@@ -5,8 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello from my DevOps pipeline!"
-
+    return '<body style="background-color: black; color: white;">Hello from my DevOps pipeline!</body>'
 
 @app.route("/health")
 def health():
