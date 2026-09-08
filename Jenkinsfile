@@ -8,7 +8,6 @@ pipeline {
     environment {
         APP_NAME = 'python-devops-demo'
         DOCKER_NETWORK = 'devops-network'
-        APP_PORT = '5000'
 
         HOST_PORT = '5000'
         CONTAINER_PORT = '5000'
